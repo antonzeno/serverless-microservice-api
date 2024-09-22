@@ -39,5 +39,6 @@ custom:
       - AWS_SESSION_TOKEN
 
 plugins:
+  - serverless-plugin-typescript
   - serverless-offline
   - serverless-dotenv-plugin
