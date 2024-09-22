@@ -1,13 +1,23 @@
 const serverless = require("serverless-http");
 const express = require("express");
-const { neon } = require("@neondatabase/serverless")
+const AWS = require("aws-sdk");
+const { neon } = require("@neondatabase/serverless");
 
 const app = express();
 
-async function dbClient() {
-  const sql = neon(process.env.DATABASE_URL);
+const DATABASE_URL_SSM_PARAM = '/serverless-nodejs-api/prod/database-url';
+const AWS_REGION = "eu-north-1";
+const ssm = new AWS.SSM({ region: AWS_REGION })
 
-  return sql
+async function dbClient() {
+
+  const paramStoreData = await ssm.getParameter({
+    Name: DATABASE_URL_SSM_PARAM,
+    WithDecryption: true,
+  }).promise()
+
+  const sql = neon(paramStoreData.Parameter.Value);
+  return sql;
 }
 
 app.get("/", async (req, res, next) => {
