@@ -23,12 +23,26 @@ provider:
             - "ssm:GetParameterHistory"
             - "ssm:DescribeParameters"
 
-
 functions:
   api:
     handler: src/index.handler
     events:
       - httpApi: "*"
+  userRegister:
+    handler: src/users/handler.register
+    events:
+      - httpApi:
+          path: /users/register
+          method: post
+  userLogin:
+    handler: src/users/handler.login
+    events:
+      - httpApi:
+          path: /users/login
+          method: post
+
+package:
+  individually: true
 
 custom:
   dotenv:
@@ -42,3 +56,4 @@ plugins:
   - serverless-plugin-typescript
   - serverless-offline
   - serverless-dotenv-plugin
+  - serverless-plugin-reducer
