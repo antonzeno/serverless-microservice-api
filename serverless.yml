@@ -29,13 +29,13 @@ functions:
     events:
       - httpApi: "*"
   userRegister:
-    handler: src/users/handler.register
+    handler: src/handlers/users/handler.register
     events:
       - httpApi:
           path: /users/register
           method: post
   userLogin:
-    handler: src/users/handler.login
+    handler: src/handlers/users/handler.login
     events:
       - httpApi:
           path: /users/login
