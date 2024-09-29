@@ -3,6 +3,9 @@ app: serverless-nodejs-api
 # "service" is the name of this project. This will also be added to your AWS resource names.
 service: serverless-nodejs-api
 useDotenv: true
+build:
+  esbuild: false
+
 
 provider:
   name: aws
@@ -22,6 +25,57 @@ provider:
             - "ssm:GetParametersByPath"
             - "ssm:GetParameterHistory"
             - "ssm:DescribeParameters"
+            - "sqs:ReceiveMessage"
+            - "sqs:DeleteMessage"
+            - "sqs:ChangeMessageVisibility"
+            - "sqs:GetQueueAttributes"
+            - "logs:CreateLogGroup"
+            - "logs:CreateLogStream"
+            - "logs:PutLogEvents"
+            - "sns:Publish"
+
+resources:
+  Resources:
+    EmailSqsQueue:
+      Type: "AWS::SQS::Queue"
+      Properties:
+        QueueName: my-sqs-queue.fifo
+        FifoQueue: true
+        ContentBasedDeduplication: true
+
+    UserRegisterSnsTopic:
+      Type: "AWS::SNS::Topic"
+      Properties:
+        TopicName: UserRegisterSr.fifo
+        FifoTopic: true
+
+    EmailSqsQueuePolicy:
+      Type: "AWS::SQS::QueuePolicy"
+      Properties:
+        Queues:
+          - Ref: EmailSqsQueue
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: "Allow"
+              Principal: "*"
+              Action: "sqs:SendMessage"
+              Resource:
+                Fn::GetAtt: [EmailSqsQueue, Arn]
+              Condition:
+                ArnEquals:
+                  aws:SourceArn:
+                    Ref: UserRegisterSnsTopic
+
+    SQSToSNSTopicSubscription:
+      Type: "AWS::SNS::Subscription"
+      Properties:
+        Endpoint: 
+          Fn::GetAtt: [EmailSqsQueue, Arn]
+        Protocol: "sqs"
+        TopicArn: 
+          Ref: UserRegisterSnsTopic
+        RawMessageDelivery: true
 
 functions:
   api:
@@ -40,6 +94,12 @@ functions:
       - httpApi:
           path: /users/login
           method: post
+  sendEmail:
+    handler: src/handlers/email/handler.send
+    events:
+      - sqs:
+          arn:
+            Fn::GetAtt: [EmailSqsQueue, Arn]
 
 package:
   individually: true

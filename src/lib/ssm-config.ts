@@ -1,7 +1,7 @@
 import { SSMClient, GetParameterCommand } from "@aws-sdk/client-ssm";
 
 const STAGE = process.env.STAGE || 'prod';
-const AWS_REGION = "eu-north-1";
+export const AWS_REGION = "eu-north-1";
 
 const PARAMS = {
     DATABASE_URL: `/serverless-nodejs-api/${STAGE}/database-url`,
@@ -10,6 +10,7 @@ const PARAMS = {
 
 const parameterCache: { [key: string]: string } = {};
 const client = new SSMClient({ region: AWS_REGION });
+
 async function getParameter(name: string): Promise<string> {
     if (parameterCache[name]) {
         return parameterCache[name];

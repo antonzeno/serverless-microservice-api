@@ -7,7 +7,9 @@
                 "cloudformation:List*",
                 "cloudformation:Get*",
                 "cloudformation:ValidateTemplate",
-                "ssm:*"
+                "ssm:*",
+                "sqs:CreateQueue",
+                "sns:*"
             ],
             "Resource": [
                 "*"
@@ -37,7 +39,9 @@
                 "lambda:List*",
                 "lambda:CreateFunction",
                 "lambda:TagResource",
-                "lambda:UntagResource"
+                "lambda:UntagResource",
+                "lambda:CreateEventSourceMapping",
+                "lambda:DeleteEventSourceMapping"
             ],
             "Resource": [
                 "*"
